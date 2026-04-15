@@ -1,8 +1,7 @@
-let data = [
-{
-  "status": "success",
-  "count": 82,
-  "data": [
+// pages/api/items.js
+
+// 82 ഐറ്റങ്ങളും ഉൾപ്പെടുത്തിയ ലിസ്റ്റ്
+let itemsList = [
     {"id":1,"name":"Tomato","name_ml":"തക്കാളി","type":"vegetable","price":40,"image":"🍅","updated_at":null},
     {"id":2,"name":"Potato","name_ml":"ഉരുളക്കിഴങ്ങ്","type":"vegetable","price":30,"image":"🥔","updated_at":null},
     {"id":3,"name":"Onion","name_ml":"സവാള","type":"vegetable","price":35,"image":"🧅","updated_at":null},
@@ -85,37 +84,40 @@ let data = [
     {"id":80,"name":"Raw Mango","name_ml":"പച്ച മാങ്ങ","type":"fruit","price":80,"image":"🥭","updated_at":null},
     {"id":81,"name":"Elephant Yam","name_ml":"ചേന","type":"vegetable","price":70,"image":"🍠","updated_at":null},
     {"id":82,"name":"Colocasia","name_ml":"ചേമ്പ്","type":"vegetable","price":60,"image":"🍠","updated_at":null}
-  ]
-}];
+];
 
 export default function handler(req, res) {
-  // GET
+  // GET: എല്ലാ ഡാറ്റയും അയക്കുന്നു
   if (req.method === "GET") {
     return res.status(200).json({
       status: "success",
-      count: data.length,
-      data
+      count: itemsList.length,
+      data: itemsList
     });
   }
 
-  // PUT (update price + time)
+  // PUT: വിലയും പുതുക്കിയ സമയവും സേവ് ചെയ്യുന്നു
   if (req.method === "PUT") {
     const { id, price } = req.body;
 
-    const index = data.findIndex(item => item.id === id);
+    // ഐറ്റത്തിന്റെ ഇൻഡക്സ് കണ്ടെത്തുന്നു
+    const index = itemsList.findIndex(item => item.id === Number(id));
 
     if (index === -1) {
       return res.status(404).json({ message: "Item not found" });
     }
 
-    data[index].price = price;
-    data[index].updated_at = new Date().toISOString();
+    // വിലയും സമയവും അപ്‌ഡേറ്റ് ചെയ്യുന്നു
+    itemsList[index].price = Number(price);
+    itemsList[index].updated_at = new Date().toISOString();
 
     return res.status(200).json({
       status: "updated",
-      data: data[index]
+      data: itemsList[index]
     });
   }
 
+  // മറ്റേതെങ്കിലും മെത്തേഡ് വന്നാൽ
   res.status(405).json({ message: "Method not allowed" });
-    }
+  }
+      
