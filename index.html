@@ -1,42 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="ml">
 <head>
+  <meta charset="UTF-8">
   <title>Price Editor</title>
   <style>
     body {
-      font-family: Arial;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       padding: 20px;
-      background: #f5f5f5;
+      background: #f0f2f5;
+      max-width: 500px;
+      margin: auto;
     }
 
     h2 {
       text-align: center;
+      color: #333;
     }
 
     .item {
       background: #fff;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    .item:hover {
+      transform: translateY(-2px);
+    }
+
+    .input-group {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     input {
-      width: 70px;
-      padding: 5px;
+      width: 80px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
     }
 
     button {
-      padding: 5px 10px;
-      margin-left: 10px;
+      padding: 8px 15px;
       border: none;
-      background: green;
+      background: #28a745;
       color: white;
-      border-radius: 5px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:disabled {
+      background: #ccc;
     }
 
     small {
-      color: gray;
+      display: block;
+      margin-top: 10px;
+      color: #777;
+      font-size: 12px;
     }
   </style>
 </head>
@@ -44,55 +71,78 @@
 
 <h2>🥦 Vegetable & Fruit Price Editor</h2>
 
-<div id="list"></div>
+<div id="list">Loading prices...</div>
 
 <script>
 const API = "/api/items";
 
+// സമയം കാണാൻ എളുപ്പമുള്ള രീതിയിലേക്ക് മാറ്റുന്നു
 function formatTime(time) {
-  if (!time) return "Not updated";
-
+  if (!time) return "ഒരിക്കലും അപ്‌ഡേറ്റ് ചെയ്തിട്ടില്ല";
   const date = new Date(time);
-  return date.toLocaleString();
+  return date.toLocaleString('ml-IN');
 }
 
+// ഐറ്റങ്ങൾ ലോഡ് ചെയ്യുന്നു
 async function loadItems() {
-  const res = await fetch(API);
-  const json = await res.json();
+  try {
+    const res = await fetch(API);
+    const json = await res.json();
 
-  const container = document.getElementById("list");
-  container.innerHTML = "";
+    const container = document.getElementById("list");
+    container.innerHTML = "";
 
-  json.data.forEach(item => {
-    container.innerHTML += `
-      <div class="item">
-        ${item.image} <b>${item.name}</b> (${item.name_ml}) <br/>
-        ₹ <input type="number" value="${item.price}" id="price-${item.id}" />
-        <button onclick="updatePrice(${item.id})">Update</button>
-        <br/>
-        <small>🕒 Last updated: ${formatTime(item.updated_at)}</small>
-      </div>
-    `;
-  });
+    json.data.forEach(item => {
+      container.innerHTML += `
+        <div class="item">
+          <span style="font-size: 20px;">${item.image}</span> 
+          <b>${item.name}</b> (${item.name_ml})
+          <div class="input-group">
+            ₹ <input type="number" value="${item.price}" id="price-${item.id}" />
+            <button id="btn-${item.id}" onclick="updatePrice(${item.id})">Update</button>
+          </div>
+          <small>🕒 അവസാനം പുതുക്കിയത്: ${formatTime(item.updated_at)}</small>
+        </div>
+      `;
+    });
+  } catch (err) {
+    document.getElementById("list").innerText = "Error loading data!";
+  }
 }
 
+// വില അപ്‌ഡേറ്റ് ചെയ്യുന്നു
 async function updatePrice(id) {
-  const price = document.getElementById(`price-${id}`).value;
+  const btn = document.getElementById(`btn-${id}`);
+  const priceInput = document.getElementById(`price-${id}`);
+  const newPrice = priceInput.value;
 
-  await fetch(API, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      id: id,
-      price: Number(price)
-    })
-  });
+  btn.innerText = "Saving...";
+  btn.disabled = true;
 
-  loadItems(); // 🔥 auto refresh
+  try {
+    const res = await fetch(API, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: id,
+        price: Number(newPrice)
+      })
+    });
+
+    if (res.ok) {
+      await loadItems(); // ലിസ്റ്റ് പുതുക്കുന്നു
+    } else {
+      alert("Error updating price!");
+    }
+  } catch (error) {
+    alert("Connection error!");
+  } finally {
+    btn.innerText = "Update";
+    btn.disabled = false;
+  }
 }
 
+// തുടക്കത്തിൽ ലിസ്റ്റ് കാണിക്കുന്നു
 loadItems();
 </script>
 
