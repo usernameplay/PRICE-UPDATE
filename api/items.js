@@ -2,7 +2,7 @@
 
 // 82 ഐറ്റങ്ങളും ഉൾപ്പെടുത്തിയ ലിസ്റ്റ്
 let itemsList = [
-    {"id":1,"name":"Tomato","name_ml":"തക്കാളി","type":"vegetable","price":40,"image":"🍅","updated_at":null},
+    {"id":1,"name":"Tomato","name_ml":"തക്കാളി","type":"vegetable","price":600,"image":"🍅","updated_at":null},
     {"id":2,"name":"Potato","name_ml":"ഉരുളക്കിഴങ്ങ്","type":"vegetable","price":30,"image":"🥔","updated_at":null},
     {"id":3,"name":"Onion","name_ml":"സവാള","type":"vegetable","price":35,"image":"🧅","updated_at":null},
     {"id":4,"name":"Carrot","name_ml":"കാരറ്റ്","type":"vegetable","price":50,"image":"🥕","updated_at":null},
