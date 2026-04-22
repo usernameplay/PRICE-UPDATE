@@ -1,6 +1,22 @@
 {
   "items": {
-    "1": { "id": 1, "name": "Tomato", "name_ml": "തക്കാളി", "price": 40 },
-    "2": { "id": 2, "name": "Potato", "name_ml": "ഉരുളക്കിഴങ്ങ്", "price": 22 }
+    "item_1": {
+      "id": 1,
+      "name": "Tomato",
+      "name_ml": "തക്കാളി",
+      "price": 40
+    },
+    "item_2": {
+      "id": 2,
+      "name": "Potato",
+      "name_ml": "ഉരുളക്കിഴങ്ങ്",
+      "price": 22
+    },
+    "item_3": {
+      "id": 3,
+      "name": "Onion Big",
+      "name_ml": "സവാള",
+      "price": 32
+    }
   }
 }
