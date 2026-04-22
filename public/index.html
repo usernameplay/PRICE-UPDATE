@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GHD Vegetable Price Update</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #2e7d32; }
+        .item { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px 0; }
+        .info { flex-grow: 1; margin-left: 10px; }
+        .price-input { width: 60px; padding: 5px; border: 1px solid #ccc; border-radius: 5px; }
+        button { background: #2e7d32; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+        .emoji { font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Vegetable Price List</h2>
+    <div id="veg-list">Loading...</div>
+</div>
+
+<script>
+    async function loadVeg() {
+        const res = await fetch('/api/veg');
+        const data = await res.json();
+        const container = document.getElementById('veg-list');
+        container.innerHTML = '';
+
+        data.forEach(item => {
+            container.innerHTML += `
+                <div class="item">
+                    <span class="emoji">${item.emoji}</span>
+                    <div class="info">
+                        <strong>${item.name_ml}</strong><br>
+                        <small>${item.title} (${item.unit})</small>
+                    </div>
+                    <input type="number" id="price-${item.id}" class="price-input" value="${item.price}">
+                    <button onclick="updatePrice(${item.id})">Update</button>
+                </div>
+            `;
+        });
+    }
+
+    async function updatePrice(id) {
+        const newPrice = document.getElementById(`price-${id}`).value;
+        const res = await fetch('/api/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id, price: newPrice })
+        });
+        const result = await res.json();
+        if(result.status === "success") {
+            alert('Price Updated Successfully!');
+            loadVeg();
+        }
+    }
+
+    loadVeg();
+</script>
+
+</body>
+</html>
