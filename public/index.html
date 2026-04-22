@@ -14,7 +14,7 @@
         .vibrant-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-left: 4px solid #10b981; }
         .btn-gradient { background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); transition: all 0.3s ease; }
         .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.5); }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .prod-img { width: 50px; height: 50px; border-radius: 12px; object-fit: cover; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -25,51 +25,44 @@
             <i class="fa-solid fa-key text-white text-4xl"></i>
         </div>
         <h2 class="text-3xl font-black mb-2 uppercase tracking-tighter">Admin <span class="text-emerald-400">Access</span></h2>
-        <p class="text-slate-400 text-sm mb-8">Enter Master Password to Unlock</p>
-        <input type="password" id="pass" class="w-full bg-slate-800/50 border border-slate-700 px-6 py-4 rounded-2xl mb-6 text-center text-2xl tracking-[0.5em] focus:ring-4 ring-emerald-500/20 outline-none transition-all">
+        <input type="password" id="pass" placeholder="••••••" class="w-full bg-slate-800/50 border border-slate-700 px-6 py-4 rounded-2xl mb-6 text-center text-2xl tracking-[0.5em] outline-none">
         <button onclick="checkAuth()" class="w-full btn-gradient text-white font-black py-4 rounded-2xl text-lg uppercase tracking-widest">Login</button>
     </div>
 </div>
 
-<div id="app-content" class="hidden max-w-6xl mx-auto">
-    <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+<div id="app-content" class="hidden max-w-4xl mx-auto">
+    <header class="flex justify-between items-center mb-10">
         <div>
-            <h1 class="text-4xl font-black tracking-tight mb-1">GHD <span class="gradient-text">COLOR PRO</span></h1>
-            <p class="text-slate-400 font-bold text-xs uppercase tracking-[0.3em] flex items-center gap-2">
-                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Inventory Control System
-            </p>
+            <h1 class="text-3xl font-black tracking-tight">GHD <span class="gradient-text">COLOR PRO</span></h1>
+            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Inventory Management</p>
         </div>
-        <div class="flex items-center gap-4">
-             <button onclick="saveAll()" id="save-btn" class="btn-gradient px-8 py-3.5 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center gap-3">
-                <i class="fa-solid fa-cloud-arrow-up"></i> Sync to Cloud
+        <div class="flex gap-3">
+            <button onclick="saveAll()" id="save-btn" class="btn-gradient px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Sync
             </button>
-            <button onclick="location.reload()" class="bg-slate-800 p-4 rounded-2xl hover:text-red-400 transition-colors">
-                <i class="fa-solid fa-power-off text-xl"></i>
+            <button onclick="location.reload()" class="bg-slate-800 p-3 rounded-xl hover:text-red-400">
+                <i class="fa-solid fa-power-off"></i>
             </button>
         </div>
     </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div class="vibrant-card p-6 rounded-3xl shadow-xl border-l-blue-500">
-            <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Stock Variety</p>
-            <h3 id="stat-count" class="text-4xl font-black">0</h3>
+    <div class="grid grid-cols-2 gap-4 mb-8">
+        <div class="vibrant-card p-4 rounded-2xl">
+            <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Total Items</p>
+            <h3 id="stat-count" class="text-2xl font-black">0</h3>
         </div>
-        <div class="vibrant-card p-6 rounded-3xl shadow-xl border-l-emerald-500">
-            <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Last Update</p>
-            <h3 id="stat-time" class="text-lg font-bold text-emerald-400">Not Synced</h3>
-        </div>
-        <button onclick="addNewRow()" class="group bg-emerald-500/10 border-2 border-dashed border-emerald-500/30 rounded-3xl flex items-center justify-center gap-4 text-emerald-400 font-black uppercase text-sm hover:bg-emerald-500 hover:text-white transition-all duration-300">
-            <i class="fa-solid fa-plus-circle text-2xl group-hover:rotate-90 transition-transform"></i> Add New Product
+        <button onclick="addNewRow()" class="bg-emerald-500/10 border-2 border-dashed border-emerald-500/30 rounded-2xl flex items-center justify-center gap-2 text-emerald-400 font-black uppercase text-xs hover:bg-emerald-500 hover:text-white transition-all">
+            <i class="fa-solid fa-plus-circle"></i> Add New
         </button>
     </div>
 
-    <div class="space-y-4" id="product-list">
-        </div>
+    <div class="space-y-3" id="product-list"></div>
 </div>
 
 <script>
     let localDB = [];
     const IMG_ROOT = "https://raw.githubusercontent.com/usernameplay/PRICE-UPDATE/refs/heads/main/vegimg/";
+    const API_BASE = "http://127.0.0.1:5000/api"; // നിങ്ങളുടെ ഫ്ലാസ്ക് URL ഇവിടെ നൽകുക
 
     function checkAuth() {
         if(document.getElementById('pass').value === "ghd123") {
@@ -80,41 +73,46 @@
     }
 
     async function loadData() {
-        const res = await fetch('/api/veg');
-        localDB = await res.json();
-        updateStats();
-        render();
+        try {
+            const res = await fetch(`${API_BASE}/veg`);
+            localDB = await res.json();
+            updateStats();
+            render();
+        } catch(e) { console.error("Load failed", e); }
     }
 
     function render() {
         const container = document.getElementById('product-list');
         container.innerHTML = localDB.map((item, idx) => `
-            <div class="vibrant-card glass p-4 md:p-6 rounded-[2rem] flex flex-col md:flex-row items-center gap-6 group hover:scale-[1.01] transition-all">
-                <div class="relative">
-                    <img src="${item.image}" class="w-24 h-24 rounded-3xl object-cover bg-slate-800 p-1 border border-slate-700 shadow-2xl" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2329/2329903.png'">
-                    <button onclick="editImg(${idx})" class="absolute -bottom-2 -right-2 bg-emerald-500 text-white w-8 h-8 rounded-xl shadow-lg flex items-center justify-center text-xs"><i class="fa-solid fa-camera"></i></button>
+            <div class="vibrant-card glass p-3 rounded-2xl flex items-center gap-4 group">
+                <div class="relative flex-shrink-0">
+                    <img src="${item.image}" class="prod-img bg-slate-800 border border-slate-700" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2329/2329903.png'">
+                    <button onclick="editImg(${idx})" class="absolute -bottom-1 -right-1 bg-emerald-500 text-white w-5 h-5 rounded-md flex items-center justify-center text-[10px] shadow-lg">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
                 </div>
-                <div class="flex-grow text-center md:text-left">
-                    <input type="text" value="${item.name_ml}" onchange="updateVal(${idx}, 'name_ml', this.value)" class="block w-full bg-transparent text-2xl font-black text-white outline-none mb-1 focus:text-emerald-400">
-                    <input type="text" value="${item.name}" onchange="updateVal(${idx}, 'name', this.value)" class="block w-full bg-transparent text-sm font-bold text-slate-500 uppercase tracking-widest outline-none">
-                </div>
-                <div class="flex items-center gap-4 bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
-                    <div class="text-right">
-                        <p class="text-[10px] font-black text-slate-500 uppercase">Rate</p>
-                        <div class="flex items-center gap-1">
-                            <span class="text-emerald-500 font-black">₹</span>
-                            <input type="number" value="${item.price}" onchange="updateVal(${idx}, 'price', this.value)" class="w-16 bg-transparent text-xl font-black text-white outline-none">
-                        </div>
-                    </div>
-                    <div class="w-[1px] h-10 bg-slate-700"></div>
-                    <div>
-                        <p class="text-[10px] font-black text-slate-500 uppercase">Unit</p>
-                        <input type="text" value="${item.unit}" onchange="updateVal(${idx}, 'unit', this.value)" class="w-16 bg-transparent text-sm font-bold text-slate-300 outline-none uppercase">
+
+                <div class="flex-grow min-w-0">
+                    <input type="text" value="${item.name_ml}" onchange="updateVal(${idx}, 'name_ml', this.value)" class="block w-full bg-transparent text-base font-bold text-white outline-none focus:text-emerald-400 leading-tight">
+                    <div class="flex items-center gap-3 mt-0.5">
+                        <select onchange="updateVal(${idx}, 'category', this.value)" class="bg-slate-800 text-[9px] font-bold text-blue-400 uppercase px-1.5 py-0.5 rounded border border-slate-700 outline-none">
+                            <option value="Vegetable" ${item.category === 'Vegetable' ? 'selected' : ''}>Veg</option>
+                            <option value="Fruit" ${item.category === 'Fruit' ? 'selected' : ''}>Fruit</option>
+                        </select>
+                        <input type="text" value="${item.unit || '1 KG'}" onchange="updateVal(${idx}, 'unit', this.value)" class="bg-transparent text-[10px] font-bold text-slate-400 outline-none w-10 uppercase">
+                        <span class="text-[9px] text-slate-500"><i class="fa-solid fa-clock mr-1"></i>${item.last_updated || 'No Date'}</span>
                     </div>
                 </div>
-                <button onclick="deleteRow(${idx})" class="bg-red-500/10 text-red-500 w-14 h-14 rounded-2xl hover:bg-red-500 hover:text-white transition-all">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
+
+                <div class="flex items-center gap-2">
+                    <div class="bg-slate-800 px-2 py-1.5 rounded-xl border border-slate-700 flex items-center">
+                        <span class="text-emerald-500 font-bold text-sm mr-1">₹</span>
+                        <input type="number" value="${item.price}" onchange="updateVal(${idx}, 'price', this.value)" class="w-10 bg-transparent text-lg font-black text-white outline-none">
+                    </div>
+                    <button onclick="deleteRow(${idx})" class="text-slate-600 hover:text-red-500 p-2">
+                        <i class="fa-solid fa-trash-can text-sm"></i>
+                    </button>
+                </div>
             </div>
         `).join('');
     }
@@ -122,40 +120,38 @@
     function updateVal(i, k, v) { localDB[i][k] = v; }
 
     function editImg(i) {
-        let n = prompt("Image Filename (eg: tomato-256.png):", localDB[i].image.split('/').pop());
+        let n = prompt("Image Filename:", localDB[i].image.split('/').pop());
         if(n) { localDB[i].image = IMG_ROOT + n; render(); }
     }
 
     function addNewRow() {
         localDB.unshift({
-            id: Date.now(), name: "New Veg", name_ml: "പുതിയ ഐറ്റം",
-            price: 0, unit: "1 KG", image: IMG_ROOT + "tomato-256.png"
+            id: Date.now(), name_ml: "പുതിയ ഐറ്റം", category: "Vegetable",
+            price: 0, unit: "1 KG", image: IMG_ROOT + "tomato-256.png", last_updated: "Just Now"
         });
         render(); updateStats();
     }
 
     function deleteRow(i) {
-        if(confirm("Remove this product?")) {
-            localDB.splice(i, 1); render(); updateStats();
-        }
+        if(confirm("Delete this item?")) { localDB.splice(i, 1); render(); updateStats(); }
     }
 
     async function saveAll() {
         const btn = document.getElementById('save-btn');
-        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Syncing...';
-        const res = await fetch('/api/save-all', {
-            method: 'POST', headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(localDB)
-        });
-        const data = await res.json();
-        document.getElementById('stat-time').innerText = data.time;
-        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Sync to Cloud';
-        alert("Success! All data updated.");
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        try {
+            const res = await fetch(`${API_BASE}/save-all`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(localDB)
+            });
+            const data = await res.json();
+            alert("Updated Successfully!");
+            loadData(); // പുതിയ സമയം കാണിക്കാൻ റീലോഡ് ചെയ്യുന്നു
+        } catch(e) { alert("Sync Failed!"); }
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Sync';
     }
 
-    function updateStats() {
-        document.getElementById('stat-count').innerText = localDB.length;
-    }
+    function updateStats() { document.getElementById('stat-count').innerText = localDB.length; }
 </script>
 </body>
 </html>
