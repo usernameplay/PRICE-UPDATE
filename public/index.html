@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GHD Color Pro | Admin</title>
+    <title>Kocha | Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -11,16 +11,16 @@
         body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; }
         .gradient-text { background: linear-gradient(90deg, #4ade80, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .vibrant-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-left: 4px solid #10b981; }
-        .btn-gradient { background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); transition: all 0.3s ease; }
+        .vibrant-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-left: 4px solid #10b981; transition: all 0.3s; }
+        .btn-gradient { background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); }
         .prod-img { width: 50px; height: 50px; border-radius: 12px; object-fit: cover; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
 <div id="auth-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950">
-    <div class="glass p-10 rounded-[2.5rem] shadow-2xl w-full max-w-sm text-center">
-        <h2 class="text-3xl font-black mb-6 uppercase tracking-tighter italic">Admin <span class="text-emerald-400">GHD</span></h2>
+    <div class="glass p-10 rounded-[2.5rem] w-full max-w-sm text-center">
+        <h2 class="text-3xl font-black mb-6 uppercase italic">Admin <span class="text-emerald-400">GHD</span></h2>
         <input type="password" id="pass" placeholder="Password" class="w-full bg-slate-800 border border-slate-700 px-6 py-4 rounded-2xl mb-6 text-center text-xl outline-none">
         <button onclick="checkAuth()" class="w-full btn-gradient text-white font-black py-4 rounded-2xl uppercase">Login</button>
     </div>
@@ -28,20 +28,21 @@
 
 <div id="app-content" class="hidden max-w-2xl mx-auto">
     <header class="flex justify-between items-center mb-10">
-        <h1 class="text-2xl font-black italic">GHD <span class="gradient-text">COLOR PRO</span></h1>
+        <h1 class="text-2xl font-black">GHD <span class="gradient-text">COLOR PRO</span></h1>
         <div class="flex gap-2">
-            <button onclick="saveAll()" id="save-btn" class="btn-gradient px-5 py-2.5 rounded-xl font-bold text-xs uppercase flex items-center gap-2">
-                <i class="fa-solid fa-cloud-arrow-up"></i> Sync
+            <button onclick="saveAll()" id="save-btn" class="btn-gradient px-6 py-3 rounded-xl font-bold text-xs uppercase flex items-center gap-2 text-white">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Sync to Cloud
             </button>
+            <button onclick="location.reload()" class="bg-slate-800 p-3 rounded-xl text-slate-400 hover:text-red-400"><i class="fa-solid fa-power-off"></i></button>
         </div>
     </header>
 
     <div class="grid grid-cols-2 gap-4 mb-6">
         <div class="vibrant-card p-4 rounded-2xl">
-            <p class="text-slate-500 text-[10px] font-black uppercase">Total Items</p>
-            <h3 id="stat-count" class="text-2xl font-black">0</h3>
+            <p class="text-slate-500 text-[10px] font-black uppercase">Stock Items</p>
+            <h3 id="stat-count" class="text-2xl font-black text-white">0</h3>
         </div>
-        <button onclick="addNewRow()" class="bg-emerald-500/10 border-2 border-dashed border-emerald-500/30 rounded-2xl text-emerald-400 font-bold text-xs uppercase">+ Add New</button>
+        <button onclick="addNewRow()" class="bg-emerald-500/10 border-2 border-dashed border-emerald-500/30 rounded-2xl text-emerald-400 font-bold text-xs uppercase hover:bg-emerald-500 hover:text-white transition-all">+ Add New</button>
     </div>
 
     <div class="space-y-3" id="product-list"></div>
@@ -49,16 +50,14 @@
 
 <script>
     let localDB = [];
-    // Vercel-ൽ ഹോസ്റ്റ് ചെയ്യുമ്പോൾ API URL സ്ലാഷ് മാത്രം മതി (Relative Path)
     const API_BASE = "/api"; 
-    const DEFAULT_IMG_ROOT = "https://raw.githubusercontent.com/usernameplay/PRICE-UPDATE/refs/heads/main/vegimg/";
 
     function checkAuth() {
         if(document.getElementById('pass').value === "ghd123") {
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-content').classList.remove('hidden');
             loadData();
-        } else { alert("Wrong Password!"); }
+        } else { alert("Access Denied!"); }
     }
 
     async function loadData() {
@@ -67,7 +66,12 @@
             localDB = await res.json();
             render();
             updateStats();
-        } catch(e) { alert("Data fetch failed!"); }
+        } catch(e) { console.log(e); }
+    }
+
+    function getFormattedTime() {
+        const now = new Date();
+        return now.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true });
     }
 
     function render() {
@@ -88,36 +92,41 @@
                             <option value="Veg" ${item.category === 'Veg' ? 'selected' : ''}>Veg</option>
                             <option value="Fruit" ${item.category === 'Fruit' ? 'selected' : ''}>Fruit</option>
                         </select>
-                        <input type="text" value="${item.unit || '1 KG'}" onchange="updateVal(${idx}, 'unit', this.value)" class="bg-transparent text-[10px] text-slate-400 w-12 outline-none uppercase">
-                        <span class="text-[9px] text-slate-500 italic">${item.last_updated || ''}</span>
+                        <input type="text" value="${item.unit || '1 KG'}" onchange="updateVal(${idx}, 'unit', this.value)" class="bg-transparent text-[10px] text-slate-400 w-12 outline-none uppercase font-medium">
+                        <span class="text-[9px] text-slate-500 font-medium italic underline decoration-emerald-500/30">${item.last_updated || 'No Date'}</span>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2">
                     <div class="bg-slate-800 px-2 py-1.5 rounded-xl border border-slate-700 flex items-center">
-                        <span class="text-emerald-500 font-bold text-xs">₹</span>
+                        <span class="text-emerald-400 font-bold text-xs">₹</span>
                         <input type="number" value="${item.price}" onchange="updateVal(${idx}, 'price', this.value)" class="w-10 bg-transparent text-lg font-black text-white outline-none ml-1 text-center">
                     </div>
-                    <button onclick="deleteRow(${idx})" class="text-slate-600 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="deleteRow(${idx})" class="text-slate-600 hover:text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>
                 </div>
             </div>
         `).join('');
     }
 
-    function updateVal(i, k, v) { localDB[i][k] = v; }
+    function updateVal(i, k, v) { 
+        localDB[i][k] = v; 
+        localDB[i]['last_updated'] = getFormattedTime(); // മാറ്റം വരുത്തിയ ഐറ്റത്തിന് മാത്രം പുതിയ സമയം
+        render(); // ഉടൻ തന്നെ സ്ക്രീനിൽ സമയം മാറാൻ
+    }
 
     function editImg(i) {
         let n = prompt("Image URL അല്ലെങ്കിൽ പേര് നൽകുക:", localDB[i].image);
         if(n) {
-            localDB[i].image = n.startsWith('http') ? n : (DEFAULT_IMG_ROOT + n);
+            localDB[i].image = n.startsWith('http') ? n : ("https://raw.githubusercontent.com/usernameplay/PRICE-UPDATE/refs/heads/main/vegimg/" + n);
+            localDB[i]['last_updated'] = getFormattedTime();
             render();
         }
     }
 
     function addNewRow() {
         localDB.unshift({
-            id: Date.now(), name_ml: "New Veg", category: "Veg",
-            price: 0, unit: "1 KG", image: "", last_updated: "Just Now"
+            id: Date.now(), name_ml: "New Product", category: "Veg",
+            price: 0, unit: "1 KG", image: "", last_updated: getFormattedTime()
         });
         render(); updateStats();
     }
@@ -135,12 +144,13 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(localDB)
             });
-            if(res.ok) { alert("Sync OK!"); loadData(); }
-        } catch(e) { alert("Sync Failed!"); }
-        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Sync';
+            if(res.ok) { alert("Data Synced to Cloud!"); }
+        } catch(e) { alert("Sync Error!"); }
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Sync to Cloud';
     }
 
     function updateStats() { document.getElementById('stat-count').innerText = localDB.length; }
 </script>
 </body>
-</html>
+    </html>
+    
