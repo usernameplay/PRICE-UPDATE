@@ -5,83 +5,126 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GHD Veg Admin</title>
     <style>
-        body { font-family: sans-serif; background: #f4f7f6; padding: 10px; margin: 0; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #2e7d32; }
-        .search-bar { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .item-card { display: flex; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0; }
-        .item-card img { width: 55px; height: 55px; border-radius: 8px; margin-right: 15px; object-fit: cover; background: #f9f9f9; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
+        .container { max-width: 550px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #1b5e20; margin-bottom: 25px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; background: #2e7d32; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #1b5e20; }
+        .hidden { display: none; }
+        .card { display: flex; align-items: center; border-bottom: 1px solid #eee; padding: 12px 0; }
+        .card img { width: 55px; height: 55px; border-radius: 10px; margin-right: 15px; background: #f9f9f9; }
         .details { flex-grow: 1; }
-        .details strong { display: block; font-size: 16px; color: #333; }
-        .details span { font-size: 13px; color: #777; }
-        .update-sec { display: flex; flex-direction: column; align-items: flex-end; }
-        .price-input { width: 70px; padding: 8px; border: 1px solid #ccc; border-radius: 5px; text-align: center; font-weight: bold; margin-bottom: 5px; }
-        button { background: #2e7d32; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
-        .last-update { font-size: 10px; color: #999; margin-top: 4px; }
+        .details strong { display: block; color: #333; }
+        .details span { font-size: 12px; color: #777; }
+        .action { display: flex; align-items: center; gap: 8px; }
+        .action input { width: 65px; margin: 0; text-align: center; }
+        .add-form { background: #f1f8e9; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #c8e6c9; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>GHD Vegetable Admin</h2>
-    <input type="text" id="search" class="search-bar" placeholder="Search vegetables..." onkeyup="filterItems()">
-    <div id="veg-list">Loading products...</div>
+    <div id="login-ui">
+        <h2>Admin Login</h2>
+        <input type="text" id="user" placeholder="Username">
+        <input type="password" id="pass" placeholder="Password">
+        <button onclick="login()">Login</button>
+    </div>
+
+    <div id="admin-ui" class="hidden">
+        <h2>GHD Product Manager</h2>
+        
+        <div class="add-form">
+            <strong style="display:block; margin-bottom:10px; color:#2e7d32;">+ Add New Product</strong>
+            <input type="text" id="add-en" placeholder="Item Name (English)">
+            <input type="text" id="add-ml" placeholder="പേര് (Malayalam)">
+            <input type="text" id="add-unit" placeholder="Unit (e.g. 1 kg)">
+            <input type="text" id="add-img" placeholder="Image Name (e.g. lemon-256.png)">
+            <button onclick="addNew()">Save Product</button>
+        </div>
+
+        <input type="text" id="search" placeholder="Search vegetables..." onkeyup="search()">
+        <div id="list">Loading...</div>
+    </div>
 </div>
 
 <script>
-    let vegData = [];
+    let masterData = [];
+    const IMG_BASE = "https://raw.githubusercontent.com/usernameplay/KochachanVeg/refs/heads/main/veg/";
 
-    async function loadData() {
-        const res = await fetch('/api/veg');
-        vegData = await res.json();
-        renderList(vegData);
+    function login() {
+        const u = document.getElementById('user').value;
+        const p = document.getElementById('pass').value;
+        // ഇതാണു നിങ്ങളുടെ യൂസർനെയിമും പാസ്‌വേഡും
+        if(u === "gopu" && p === "ghd123") {
+            document.getElementById('login-ui').style.display = 'none';
+            document.getElementById('admin-ui').classList.remove('hidden');
+            fetchData();
+        } else {
+            alert("Invalid Username or Password!");
+        }
     }
 
-    function renderList(items) {
-        const listDiv = document.getElementById('veg-list');
-        listDiv.innerHTML = '';
-        if(items.length === 0) {
-            listDiv.innerHTML = '<p>No data. Visit <a href="/api/setup">Setup</a>.</p>';
-            return;
-        }
-        items.forEach(item => {
-            listDiv.innerHTML += `
-                <div class="item-card">
-                    <img src="${item.image}" alt="img">
+    async function fetchData() {
+        const r = await fetch('/api/veg');
+        masterData = await r.json();
+        render(masterData);
+    }
+
+    function render(data) {
+        const div = document.getElementById('list');
+        div.innerHTML = '';
+        data.forEach(item => {
+            div.innerHTML += `
+                <div class="card">
+                    <img src="${item.image}" onerror="this.src='https://via.placeholder.com/55?text=Veg'">
                     <div class="details">
                         <strong>${item.name_ml}</strong>
                         <span>${item.name} (${item.unit})</span>
-                        <div class="last-update">Updated: ${item.updated_at}</div>
                     </div>
-                    <div class="update-sec">
-                        <input type="number" id="p-${item.id}" class="price-input" value="${item.price}">
-                        <button onclick="updatePrice(${item.id})">OK</button>
+                    <div class="action">
+                        <input type="number" id="pr-${item.id}" value="${item.price}">
+                        <button style="width:auto; padding:8px 12px;" onclick="update(${item.id})">OK</button>
                     </div>
                 </div>`;
         });
     }
 
-    function filterItems() {
-        const term = document.getElementById('search').value.toLowerCase();
-        const filtered = vegData.filter(v => 
-            v.name.toLowerCase().includes(term) || v.name_ml.toLowerCase().includes(term)
-        );
-        renderList(filtered);
+    async function addNew() {
+        const item = {
+            name: document.getElementById('add-en').value,
+            name_ml: document.getElementById('add-ml').value,
+            unit: document.getElementById('add-unit').value,
+            price: "0",
+            image: IMG_BASE + document.getElementById('add-img').value
+        };
+        await fetch('/api/add', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(item)
+        });
+        alert("Added!");
+        fetchData();
     }
 
-    async function updatePrice(id) {
-        const p = document.getElementById(`p-${id}`).value;
-        const res = await fetch('/api/update', {
+    async function update(id) {
+        const p = document.getElementById(`pr-${id}`).value;
+        await fetch('/api/update', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({id: id, price: p})
         });
-        if(res.ok) {
-            alert("Updated!");
-            loadData();
-        }
+        fetchData();
     }
-    loadData();
+
+    function search() {
+        const t = document.getElementById('search').value.toLowerCase();
+        const filtered = masterData.filter(v => 
+            v.name.toLowerCase().includes(t) || v.name_ml.toLowerCase().includes(t)
+        );
+        render(filtered);
+    }
 </script>
 </body>
 </html>
