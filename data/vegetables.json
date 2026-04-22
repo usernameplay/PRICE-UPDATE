@@ -1,0 +1,90 @@
+[
+  {
+    "id": 1,
+    "title": "Tomato",
+    "name_ml": "തക്കാളി",
+    "name_en": "Tomato",
+    "name_manglish": "Thakkali",
+    "price": "40",
+    "unit": "1 kg",
+    "updated_at": "2026-04-22 06:15 PM",
+    "emoji": "🍅"
+  },
+  {
+    "id": 2,
+    "title": "Onion",
+    "name_ml": "സവാള",
+    "name_en": "Onion",
+    "name_manglish": "Savala",
+    "price": "35",
+    "unit": "1 kg",
+    "updated_at": "2026-04-22 06:15 PM",
+    "emoji": "🧅"
+  },
+  {
+    "id": 3,
+    "title": "Potato",
+    "name_ml": "ഉരുളക്കിഴങ്ങ്",
+    "name_en": "Potato",
+    "name_manglish": "Urulakkizhangu",
+    "price": "30",
+    "unit": "1 kg",
+    "updated_at": "2026-04-22 06:15 PM",
+    "emoji": "🥔"
+  },
+  {
+    "id": 4,
+    "title": "Green Chilli",
+    "name_ml": "പച്ചമുളക്",
+    "name_en": "Green Chilli",
+    "name_manglish": "Pachamulaku",
+    "price": "15",
+    "unit": "250 gm",
+    "updated_at": "2026-04-22 06:15 PM",
+    "emoji": "🌶️"
+  },
+  {
+    "id": 5,
+    "title": "Carrot",
+    "name_ml": "കാരറ്റ്",
+    "name_en": "Carrot",
+    "name_manglish": "Carrot",
+    "price": "50",
+    "unit": "1 kg",
+    "updated_at": "2026-04-22 06:15 PM",
+    "emoji": "🥕"
+  },
+  {
+    "id": 6,
+    "title": "Ginger",
+    "name_ml": "ഇഞ്ചി",
+    "name_en": "Ginger",
+    "name_manglish": "Inchi",
+    "price": "45",
+    "unit": "250 gm",
+    "updated_at": "2026-04-22 06:15 PM",
+    "emoji": "🫚"
+  },
+  {
+    "id": 7,
+    "title": "Ladies Finger",
+    "name_ml": "വെണ്ടയ്ക്ക",
+    "name_en": "Ladies Finger",
+    "name_manglish": "Vendakka",
+    "price": "40",
+    "unit": "1 kg",
+    "updated_at": "2026-04-22 06:15 PM",
+    "emoji": "🥦"
+  },
+  {
+    "id": 8,
+    "title": "Brinjal",
+    "name_ml": "വഴുതനങ്ങ",
+    "name_en": "Brinjal",
+    "name_manglish": "Vazhuthananga",
+    "price": "38",
+    "unit": "1 kg",
+    "updated_at": "2026-04-22 06:15 PM",
+    "emoji": "🍆"
+  }
+]
