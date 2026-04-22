@@ -78,9 +78,6 @@ def setup():
         {"id":29,"title":"Colocasia","name_ml":"ചേമ്പ്","name_en":"Colocasia","name_manglish":"Chembu","price":"0","unit":"1 kg","updated_at":"N/A","emoji":"🍠"},
         {"id":30,"title":"Raw Banana","name_ml":"പച്ചക്കായ","name_en":"Raw Banana","name_manglish":"Pachakkaya","price":"0","unit":"1 pc","updated_at":"N/A","emoji":"🍌"}
     ]
-    # ബാക്കി 70 എണ്ണം ഡമ്മി ആയി ആഡ് ചെയ്യുന്നു
-    for i in range(31, 101):
-        items.append({"id":i,"title":f"Item {i}","name_ml":f"പച്ചക്കറി {i}","name_en":f"Veg {i}","name_manglish":f"Veg {i}","price":"0","unit":"1 kg","updated_at":"N/A","emoji":"🥗"})
     
     requests.post(f"{UPSTASH_URL}/set/vegetables", headers=headers, data=json.dumps(items))
     return "Setup Complete! Go to home page."
