@@ -3,126 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GHD Veg Admin</title>
+    <title>GHD Inventory | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
-        .container { max-width: 550px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #1b5e20; margin-bottom: 25px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; background: #2e7d32; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #1b5e20; }
-        .hidden { display: none; }
-        .card { display: flex; align-items: center; border-bottom: 1px solid #eee; padding: 12px 0; }
-        .card img { width: 55px; height: 55px; border-radius: 10px; margin-right: 15px; background: #f9f9f9; }
-        .details { flex-grow: 1; }
-        .details strong { display: block; color: #333; }
-        .details span { font-size: 12px; color: #777; }
-        .action { display: flex; align-items: center; gap: 8px; }
-        .action input { width: 65px; margin: 0; text-align: center; }
-        .add-form { background: #f1f8e9; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #c8e6c9; }
+        body { background: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .item-row:hover { background-color: #f1f5f9; transition: 0.2s; }
+        .sticky-header { position: sticky; top: 0; z-index: 50; }
     </style>
 </head>
-<body>
+<body class="pb-10">
 
-<div class="container">
-    <div id="login-ui">
-        <h2>Admin Login</h2>
-        <input type="text" id="user" placeholder="Username">
-        <input type="password" id="pass" placeholder="Password">
-        <button onclick="login()">Login</button>
-    </div>
-
-    <div id="admin-ui" class="hidden">
-        <h2>GHD Product Manager</h2>
-        
-        <div class="add-form">
-            <strong style="display:block; margin-bottom:10px; color:#2e7d32;">+ Add New Product</strong>
-            <input type="text" id="add-en" placeholder="Item Name (English)">
-            <input type="text" id="add-ml" placeholder="പേര് (Malayalam)">
-            <input type="text" id="add-unit" placeholder="Unit (e.g. 1 kg)">
-            <input type="text" id="add-img" placeholder="Image Name (e.g. lemon-256.png)">
-            <button onclick="addNew()">Save Product</button>
+<div id="login-ui" class="fixed inset-0 z-[100] flex items-center justify-center bg-emerald-900">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4">
+        <div class="text-center mb-6">
+            <div class="bg-emerald-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-leaf text-emerald-600 text-2xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800">GHD Admin Portal</h2>
+            <p class="text-slate-500 text-sm">Please login to manage inventory</p>
         </div>
-
-        <input type="text" id="search" placeholder="Search vegetables..." onkeyup="search()">
-        <div id="list">Loading...</div>
+        <div class="space-y-4">
+            <input type="text" id="user" placeholder="Username" class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-emerald-500 outline-none">
+            <input type="password" id="pass" placeholder="Password" class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-emerald-500 outline-none">
+            <button onclick="handleLogin()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-lg transition">Access Dashboard</button>
+        </div>
     </div>
 </div>
 
-<script>
-    let masterData = [];
-    const IMG_BASE = "https://raw.githubusercontent.com/usernameplay/KochachanVeg/refs/heads/main/veg/";
+<div id="admin-ui" class="hidden">
+    <header class="sticky-header glass border-b p-4 shadow-sm">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-emerald-800 flex items-center gap-2">
+                <i class="fa-solid fa-basket-shopping"></i> GHD Play Games
+            </h1>
+            <button onclick="location.reload()" class="text-slate-500 hover:text-emerald-600">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </div>
+    </header>
 
-    function login() {
+    <main class="max-w-4xl mx-auto p-4 space-y-6">
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                <p class="text-xs text-slate-500 uppercase font-bold">Total Items</p>
+                <p id="count-label" class="text-2xl font-black text-slate-800">0</p>
+            </div>
+            <button onclick="toggleAddForm()" class="bg-emerald-50 border-2 border-dashed border-emerald-200 rounded-xl flex items-center justify-center text-emerald-700 font-bold hover:bg-emerald-100">
+                <i class="fa-solid fa-plus mr-2"></i> Add Item
+            </button>
+        </div>
+
+        <div id="add-form" class="hidden bg-white p-6 rounded-xl shadow-md border border-emerald-100">
+            <h3 class="font-bold mb-4">Add New Product</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" id="new-en" placeholder="English Name" class="p-3 border rounded-lg">
+                <input type="text" id="new-ml" placeholder="മലയാളം പേര്" class="p-3 border rounded-lg">
+                <input type="text" id="new-unit" placeholder="Unit (eg: 1 kg)" class="p-3 border rounded-lg">
+                <input type="text" id="new-img" placeholder="Image Name (eg: tomato-256.png)" class="p-3 border rounded-lg">
+                <button onclick="saveNew()" class="md:col-span-2 bg-emerald-600 text-white py-3 rounded-lg font-bold">Confirm Add</button>
+            </div>
+        </div>
+
+        <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-slate-400"></i>
+            <input type="text" id="search" onkeyup="filterItems()" placeholder="Search by name or മലയാളം..." class="w-full pl-12 pr-4 py-4 rounded-xl shadow-sm border focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+
+        <div id="list-container" class="bg-white rounded-xl shadow-sm border overflow-hidden">
+            </div>
+    </main>
+</div>
+
+<script>
+    let db = [];
+    const IMG_ROOT = "https://raw.githubusercontent.com/usernameplay/KochachanVeg/refs/heads/main/veg/";
+
+    function handleLogin() {
         const u = document.getElementById('user').value;
         const p = document.getElementById('pass').value;
-        // ഇതാണു നിങ്ങളുടെ യൂസർനെയിമും പാസ്‌വേഡും
         if(u === "gopu" && p === "ghd123") {
-            document.getElementById('login-ui').style.display = 'none';
+            document.getElementById('login-ui').classList.add('hidden');
             document.getElementById('admin-ui').classList.remove('hidden');
             fetchData();
         } else {
-            alert("Invalid Username or Password!");
+            alert("Invalid Credentials");
         }
     }
 
     async function fetchData() {
         const r = await fetch('/api/veg');
-        masterData = await r.json();
-        render(masterData);
+        db = await r.json();
+        document.getElementById('count-label').innerText = db.length;
+        render(db);
     }
 
     function render(data) {
-        const div = document.getElementById('list');
-        div.innerHTML = '';
-        data.forEach(item => {
-            div.innerHTML += `
-                <div class="card">
-                    <img src="${item.image}" onerror="this.src='https://via.placeholder.com/55?text=Veg'">
-                    <div class="details">
-                        <strong>${item.name_ml}</strong>
-                        <span>${item.name} (${item.unit})</span>
+        const container = document.getElementById('list-container');
+        container.innerHTML = data.map(item => `
+            <div class="item-row flex items-center p-4 border-b last:border-0">
+                <img src="${item.image}" class="w-14 h-14 rounded-lg bg-slate-50 object-cover border" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2329/2329903.png'">
+                <div class="ml-4 flex-grow">
+                    <h4 class="font-bold text-slate-800">${item.name_ml}</h4>
+                    <p class="text-xs text-slate-500">${item.name} • ${item.unit}</p>
+                    <p class="text-[10px] text-emerald-600 mt-1"><i class="fa-solid fa-clock"></i> ${item.updated_at}</p>
+                </div>
+                <div class="flex flex-col items-end gap-2">
+                    <div class="flex items-center bg-slate-100 rounded-lg p-1">
+                        <span class="px-2 text-slate-400 text-sm font-bold">₹</span>
+                        <input type="number" id="pr-${item.id}" value="${item.price}" class="w-16 bg-transparent font-bold text-slate-800 outline-none text-right pr-1">
                     </div>
-                    <div class="action">
-                        <input type="number" id="pr-${item.id}" value="${item.price}">
-                        <button style="width:auto; padding:8px 12px;" onclick="update(${item.id})">OK</button>
-                    </div>
-                </div>`;
-        });
+                    <button onclick="updatePrice(${item.id})" class="text-xs bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 transition">Update</button>
+                </div>
+            </div>
+        `).join('');
     }
 
-    async function addNew() {
+    async function updatePrice(id) {
+        const price = document.getElementById(`pr-${id}`).value;
+        const btn = event.target;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        await fetch('/api/update', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({id, price})
+        });
+        btn.innerHTML = 'Update';
+        fetchData();
+    }
+
+    function toggleAddForm() {
+        document.getElementById('add-form').classList.toggle('hidden');
+    }
+
+    async function saveNew() {
         const item = {
-            name: document.getElementById('add-en').value,
-            name_ml: document.getElementById('add-ml').value,
-            unit: document.getElementById('add-unit').value,
+            name: document.getElementById('new-en').value,
+            name_ml: document.getElementById('new-ml').value,
+            unit: document.getElementById('new-unit').value,
             price: "0",
-            image: IMG_BASE + document.getElementById('add-img').value
+            image: IMG_ROOT + document.getElementById('new-img').value
         };
         await fetch('/api/add', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(item)
         });
-        alert("Added!");
+        toggleAddForm();
         fetchData();
     }
 
-    async function update(id) {
-        const p = document.getElementById(`pr-${id}`).value;
-        await fetch('/api/update', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({id: id, price: p})
-        });
-        fetchData();
-    }
-
-    function search() {
-        const t = document.getElementById('search').value.toLowerCase();
-        const filtered = masterData.filter(v => 
-            v.name.toLowerCase().includes(t) || v.name_ml.toLowerCase().includes(t)
-        );
+    function filterItems() {
+        const q = document.getElementById('search').value.toLowerCase();
+        const filtered = db.filter(i => i.name.toLowerCase().includes(q) || i.name_ml.toLowerCase().includes(q));
         render(filtered);
     }
 </script>
