@@ -3,161 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GHD Inventory | Dashboard</title>
+    <title>GHD | Advanced Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { background: #f8fafc; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .item-row:hover { background-color: #f1f5f9; transition: 0.2s; }
-        .sticky-header { position: sticky; top: 0; z-index: 50; }
-    </style>
 </head>
-<body class="pb-10">
+<body class="bg-slate-50 min-h-screen">
 
-<div id="login-ui" class="fixed inset-0 z-[100] flex items-center justify-center bg-emerald-900">
-    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4">
-        <div class="text-center mb-6">
-            <div class="bg-emerald-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fa-solid fa-leaf text-emerald-600 text-2xl"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-slate-800">GHD Admin Portal</h2>
-            <p class="text-slate-500 text-sm">Please login to manage inventory</p>
-        </div>
-        <div class="space-y-4">
-            <input type="text" id="user" placeholder="Username" class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-emerald-500 outline-none">
-            <input type="password" id="pass" placeholder="Password" class="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-emerald-500 outline-none">
-            <button onclick="handleLogin()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-lg transition">Access Dashboard</button>
-        </div>
+<div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-80 text-center">
+        <h2 class="text-xl font-bold mb-4">GHD Login</h2>
+        <input type="password" id="pass" placeholder="Password" class="w-full border p-3 rounded-lg mb-4 text-center">
+        <button onclick="login()" class="w-full bg-emerald-600 text-white py-3 rounded-lg font-bold">Access</button>
     </div>
 </div>
 
-<div id="admin-ui" class="hidden">
-    <header class="sticky-header glass border-b p-4 shadow-sm">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold text-emerald-800 flex items-center gap-2">
-                <i class="fa-solid fa-basket-shopping"></i> GHD Play Games
-            </h1>
-            <button onclick="location.reload()" class="text-slate-500 hover:text-emerald-600">
-                <i class="fa-solid fa-right-from-bracket"></i>
-            </button>
-        </div>
-    </header>
+<div id="main-ui" class="hidden max-w-5xl mx-auto p-4 pb-20">
+    <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm">
+        <h1 class="text-xl font-black text-emerald-700 uppercase tracking-tight">Management Portal</h1>
+        <button onclick="saveAllChanges()" id="save-btn" class="bg-emerald-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg hover:bg-emerald-700 transition">
+            <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save All Changes
+        </button>
+    </div>
 
-    <main class="max-w-4xl mx-auto p-4 space-y-6">
-        <div class="grid grid-cols-2 gap-4">
-            <div class="bg-white p-4 rounded-xl shadow-sm border">
-                <p class="text-xs text-slate-500 uppercase font-bold">Total Items</p>
-                <p id="count-label" class="text-2xl font-black text-slate-800">0</p>
-            </div>
-            <button onclick="toggleAddForm()" class="bg-emerald-50 border-2 border-dashed border-emerald-200 rounded-xl flex items-center justify-center text-emerald-700 font-bold hover:bg-emerald-100">
-                <i class="fa-solid fa-plus mr-2"></i> Add Item
-            </button>
-        </div>
-
-        <div id="add-form" class="hidden bg-white p-6 rounded-xl shadow-md border border-emerald-100">
-            <h3 class="font-bold mb-4">Add New Product</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" id="new-en" placeholder="English Name" class="p-3 border rounded-lg">
-                <input type="text" id="new-ml" placeholder="മലയാളം പേര്" class="p-3 border rounded-lg">
-                <input type="text" id="new-unit" placeholder="Unit (eg: 1 kg)" class="p-3 border rounded-lg">
-                <input type="text" id="new-img" placeholder="Image Name (eg: tomato-256.png)" class="p-3 border rounded-lg">
-                <button onclick="saveNew()" class="md:col-span-2 bg-emerald-600 text-white py-3 rounded-lg font-bold">Confirm Add</button>
-            </div>
-        </div>
-
-        <div class="relative">
-            <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-slate-400"></i>
-            <input type="text" id="search" onkeyup="filterItems()" placeholder="Search by name or മലയാളം..." class="w-full pl-12 pr-4 py-4 rounded-xl shadow-sm border focus:ring-2 focus:ring-emerald-500 outline-none">
-        </div>
-
-        <div id="list-container" class="bg-white rounded-xl shadow-sm border overflow-hidden">
-            </div>
-    </main>
+    <div class="bg-white rounded-2xl shadow-sm border overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-bold">
+                <tr>
+                    <th class="p-4">Image</th>
+                    <th class="p-4">Names (EN / ML)</th>
+                    <th class="p-4">Price (₹)</th>
+                    <th class="p-4">Unit</th>
+                    <th class="p-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
     let db = [];
-    const IMG_ROOT = "https://raw.githubusercontent.com/usernameplay/KochachanVeg/refs/heads/main/veg/";
+    const IMG_BASE = "https://raw.githubusercontent.com/usernameplay/PRICE-UPDATE/refs/heads/main/vegimg/";
 
-    function handleLogin() {
-        const u = document.getElementById('user').value;
-        const p = document.getElementById('pass').value;
-        if(u === "gopu" && p === "ghd123") {
-            document.getElementById('login-ui').classList.add('hidden');
-            document.getElementById('admin-ui').classList.remove('hidden');
-            fetchData();
-        } else {
-            alert("Invalid Credentials");
-        }
+    function login() {
+        if(document.getElementById('pass').value === "ghd123") {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-ui').classList.remove('hidden');
+            loadData();
+        } else { alert("Wrong Password!"); }
     }
 
-    async function fetchData() {
+    async function loadData() {
         const r = await fetch('/api/veg');
         db = await r.json();
-        document.getElementById('count-label').innerText = db.length;
-        render(db);
+        renderTable();
     }
 
-    function render(data) {
-        const container = document.getElementById('list-container');
-        container.innerHTML = data.map(item => `
-            <div class="item-row flex items-center p-4 border-b last:border-0">
-                <img src="${item.image}" class="w-14 h-14 rounded-lg bg-slate-50 object-cover border" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2329/2329903.png'">
-                <div class="ml-4 flex-grow">
-                    <h4 class="font-bold text-slate-800">${item.name_ml}</h4>
-                    <p class="text-xs text-slate-500">${item.name} • ${item.unit}</p>
-                    <p class="text-[10px] text-emerald-600 mt-1"><i class="fa-solid fa-clock"></i> ${item.updated_at}</p>
-                </div>
-                <div class="flex flex-col items-end gap-2">
-                    <div class="flex items-center bg-slate-100 rounded-lg p-1">
-                        <span class="px-2 text-slate-400 text-sm font-bold">₹</span>
-                        <input type="number" id="pr-${item.id}" value="${item.price}" class="w-16 bg-transparent font-bold text-slate-800 outline-none text-right pr-1">
-                    </div>
-                    <button onclick="updatePrice(${item.id})" class="text-xs bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 transition">Update</button>
-                </div>
-            </div>
+    function renderTable() {
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = db.map((item, index) => `
+            <tr class="border-b last:border-0 hover:bg-slate-50 transition">
+                <td class="p-4">
+                    <img src="${item.image}" class="w-12 h-12 rounded object-cover border bg-slate-100" 
+                         onclick="changeImage(${index})" title="Click to change image link" 
+                         onerror="this.src='https://cdn-icons-png.flaticon.com/512/2329/2329903.png'">
+                </td>
+                <td class="p-4">
+                    <input type="text" value="${item.name}" onchange="updateLocal(${index}, 'name', this.value)" class="block font-bold text-slate-700 bg-transparent outline-none w-full border-b border-transparent focus:border-emerald-300">
+                    <input type="text" value="${item.name_ml}" onchange="updateLocal(${index}, 'name_ml', this.value)" class="block text-sm text-slate-500 bg-transparent outline-none w-full border-b border-transparent focus:border-emerald-300">
+                </td>
+                <td class="p-4">
+                    <input type="number" value="${item.price}" onchange="updateLocal(${index}, 'price', this.value)" class="w-20 p-2 rounded border border-slate-200 font-bold text-center focus:ring-2 focus:ring-emerald-500 outline-none">
+                </td>
+                <td class="p-4">
+                    <input type="text" value="${item.unit}" onchange="updateLocal(${index}, 'unit', this.value)" class="w-20 p-2 text-sm text-slate-500 bg-transparent outline-none border-b border-transparent focus:border-emerald-300">
+                </td>
+                <td class="p-4">
+                    <button onclick="deleteItem(${index})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash-can"></i></button>
+                </td>
+            </tr>
         `).join('');
     }
 
-    async function updatePrice(id) {
-        const price = document.getElementById(`pr-${id}`).value;
-        const btn = event.target;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-        await fetch('/api/update', {
+    function updateLocal(index, field, value) {
+        db[index][field] = value;
+        console.log("Locally updated:", db[index]);
+    }
+
+    function changeImage(index) {
+        const currentFile = db[index].image.split('/').pop();
+        const newFile = prompt("Enter new image filename (from GitHub):", currentFile);
+        if(newFile) {
+            db[index].image = IMG_BASE + newFile;
+            renderTable();
+        }
+    }
+
+    async function saveAllChanges() {
+        const btn = document.getElementById('save-btn');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Saving...';
+        btn.disabled = true;
+
+        const res = await fetch('/api/save-all', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({id, price})
+            body: JSON.stringify(db)
         });
-        btn.innerHTML = 'Update';
-        fetchData();
+
+        if(res.ok) {
+            alert("All changes synchronized to database!");
+            loadData();
+        }
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save All Changes';
+        btn.disabled = false;
     }
 
-    function toggleAddForm() {
-        document.getElementById('add-form').classList.toggle('hidden');
-    }
-
-    async function saveNew() {
-        const item = {
-            name: document.getElementById('new-en').value,
-            name_ml: document.getElementById('new-ml').value,
-            unit: document.getElementById('new-unit').value,
-            price: "0",
-            image: IMG_ROOT + document.getElementById('new-img').value
-        };
-        await fetch('/api/add', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(item)
-        });
-        toggleAddForm();
-        fetchData();
-    }
-
-    function filterItems() {
-        const q = document.getElementById('search').value.toLowerCase();
-        const filtered = db.filter(i => i.name.toLowerCase().includes(q) || i.name_ml.toLowerCase().includes(q));
-        render(filtered);
+    function deleteItem(index) {
+        if(confirm("Delete this item?")) {
+            db.splice(index, 1);
+            renderTable();
+        }
     }
 </script>
 </body>
